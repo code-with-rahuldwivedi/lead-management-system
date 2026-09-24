@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Lead')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main>
+    <div th:replace="~{fragments :: flash}"></div>
+
+    <h1>
+        <span th:text="${lead.name}">Name</span>
+        <span class="tag" th:classappend="'s-' + ${lead.status}" th:text="${lead.status.label}">New</span>
+    </h1>
+
+    <section class="card info">
+        <div><small>Phone</small><b th:text="${lead.phone}">-</b></div>
+        <div><small>Email</small><b th:text="${lead.email != null ? lead.email : '-'}">-</b></div>
+        <div><small>Source</small><b th:text="${lead.source.label}">-</b></div>
+        <div><small>Course</small><b th:text="${lead.courseInterest != null ? lead.courseInterest.name : '-'}">-</b></div>
+        <div><small>Counsellor</small><b th:text="${lead.assignedTo != null ? lead.assignedTo.name : 'Unassigned'}">-</b></div>
+        <div><small>Created</small><b th:text="${#temporals.format(lead.createdAt, 'dd MMM yyyy, HH:mm')}">-</b></div>
+        <div><small>Last contact</small><b th:text="${lead.lastContactedAt != null ? #temporals.format(lead.lastContactedAt, 'dd MMM yyyy, HH:mm') : 'Never'}">-</b></div>
+        <div th:if="${lead.lostReason != null}"><small>Lost reason</small><b th:text="${lead.lostReason}">-</b></div>
+        <div th:if="${lead.notes != null}"><small>Notes</small><b th:text="${lead.notes}">-</b></div>
+    </section>
+
+    <section class="grid">
+        <div class="card">
+            <h2>Change status</h2>
+            <form th:if="${!lead.status.closed}" th:action="@{/leads/{id}/status(id=${lead.id})}" method="post" class="inline">
+                <select name="status">
+                    <option th:each="s : ${nextStatuses}" th:value="${s}" th:text="${s.label}"></option>
+                </select>
+                <input type="text" name="reason" maxlength="255" placeholder="Reason (required for Lost)">
+                <button class="btn">Update</button>
+            </form>
+            <p class="muted" th:if="${lead.status.closed}">This lead is closed. Status can no longer change.</p>
+        </div>
+
+        <div class="card">
+            <h2>Reassign counsellor</h2>
+            <form th:if="${!lead.status.closed}" th:action="@{/leads/{id}/assign(id=${lead.id})}" method="post" class="inline">
+                <select name="counsellorId">
+                    <option th:each="c : ${counsellors}" th:value="${c.id}" th:text="${c.name}"></option>
+                </select>
+                <button class="btn">Reassign</button>
+            </form>
+            <p class="muted" th:if="${lead.status.closed}">Closed leads cannot be reassigned.</p>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Follow-ups</h2>
+        <form th:if="${!lead.status.closed}" th:action="@{/leads/{id}/followups(id=${lead.id})}" method="post" class="inline">
+            <input type="datetime-local" name="dueAt" required>
+            <select name="type">
+                <option th:each="t : ${followUpTypes}" th:value="${t}" th:text="${t.label}"></option>
+            </select>
+            <input type="text" name="note" maxlength="500" placeholder="Note (optional)">
+            <button class="btn">Schedule</button>
+        </form>
+        <p class="muted" th:if="${#lists.isEmpty(followUps)}">No follow-ups yet.</p>
+        <table th:unless="${#lists.isEmpty(followUps)}">
+            <thead><tr><th>Due</th><th>Type</th><th>Note</th><th>State</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="f : ${followUps}">
+                <td th:text="${#temporals.format(f.dueAt, 'dd MMM yyyy, HH:mm')}">-</td>
+                <td th:text="${f.type.label}">Call</td>
+                <td th:text="${f.note != null ? f.note : '-'}">-</td>
+                <td>
+                    <span th:if="${f.done}" class="tag ok">Done</span>
+                    <span th:if="${f.overdue}" class="tag err">Overdue</span>
+                    <span th:if="${!f.done and !f.overdue}" class="tag">Pending</span>
+                </td>
+                <td>
+                    <form th:if="${!f.done}" th:action="@{/followups/{id}/complete(id=${f.id})}" method="post">
+                        <input type="hidden" name="leadId" th:value="${lead.id}">
+                        <input type="hidden" name="from" value="lead">
+                        <button class="link">Mark done</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="card">
+        <h2>Activity timeline</h2>
+        <ul class="timeline">
+            <li th:each="t : ${timeline}">
+                <b th:text="${t.type}">TYPE</b>
+                <span th:text="${t.description}">desc</span>
+                <span class="muted" th:if="${t.oldValue != null or t.newValue != null}"
+                      th:text="'(' + ${t.oldValue != null ? t.oldValue : '-'} + ' -> ' + ${t.newValue != null ? t.newValue : '-'} + ')'"></span>
+                <small class="muted" th:text="${t.actor} + ' | ' + ${#temporals.format(t.createdAt, 'dd MMM yyyy, HH:mm')}"></small>
+            </li>
+        </ul>
+    </section>
+</main>
+</body>
+</html>

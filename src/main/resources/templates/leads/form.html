@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('New lead')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main class="narrow">
+    <h1>New lead</h1>
+    <form th:action="@{/leads}" th:object="${leadForm}" method="post" class="form">
+
+        <div class="alert err" th:if="${#fields.hasGlobalErrors()}">
+            <div th:each="err : ${#fields.globalErrors()}" th:text="${err}"></div>
+        </div>
+
+        <label>Name *
+            <input type="text" th:field="*{name}" maxlength="100">
+            <span class="fe" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+        </label>
+
+        <label>Phone * <small>(+91 and spaces are fine)</small>
+            <input type="text" th:field="*{phone}" maxlength="20">
+            <span class="fe" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+        </label>
+
+        <label>Email
+            <input type="text" th:field="*{email}" maxlength="150">
+            <span class="fe" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+        </label>
+
+        <label>Source *
+            <select th:field="*{source}">
+                <option value="">-- select --</option>
+                <option th:each="s : ${sources}" th:value="${s}" th:text="${s.label}"></option>
+            </select>
+            <span class="fe" th:if="${#fields.hasErrors('source')}" th:errors="*{source}"></span>
+        </label>
+
+        <label>Course interest
+            <select th:field="*{courseId}">
+                <option value="">-- not decided --</option>
+                <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.name}"></option>
+            </select>
+        </label>
+
+        <label>Notes
+            <textarea th:field="*{notes}" rows="3" maxlength="1000"></textarea>
+            <span class="fe" th:if="${#fields.hasErrors('notes')}" th:errors="*{notes}"></span>
+        </label>
+
+        <button class="btn">Save lead</button>
+        <a th:href="@{/leads}">Cancel</a>
+    </form>
+</main>
+</body>
+</html>

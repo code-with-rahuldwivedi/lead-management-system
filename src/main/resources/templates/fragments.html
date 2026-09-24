@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' | Lead Manager'">Lead Manager</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<nav th:fragment="nav" class="nav">
+    <strong>Admission Leads</strong>
+    <a th:href="@{/}">Dashboard</a>
+    <a th:href="@{/leads}">Leads</a>
+    <a th:href="@{/followups/overdue}">Overdue follow-ups</a>
+    <a th:href="@{/leads/new}" class="btn">+ New lead</a>
+</nav>
+<div th:fragment="flash">
+    <div class="alert ok" th:if="${success}" th:text="${success}"></div>
+    <div class="alert warn" th:if="${warning}" th:text="${warning}"></div>
+    <div class="alert err" th:if="${error}" th:text="${error}"></div>
+</div>
+</body>
+</html>

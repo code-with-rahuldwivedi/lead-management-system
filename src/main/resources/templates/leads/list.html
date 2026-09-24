@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Leads')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main>
+    <div th:replace="~{fragments :: flash}"></div>
+    <h1>Leads</h1>
+
+    <form th:action="@{/leads}" method="get" class="filters">
+        <input type="text" name="q" th:value="${fQ}" placeholder="Search name, phone, email">
+        <select name="status">
+            <option value="">All statuses</option>
+            <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}" th:selected="${s == fStatus}"></option>
+        </select>
+        <select name="source">
+            <option value="">All sources</option>
+            <option th:each="s : ${sources}" th:value="${s}" th:text="${s.label}" th:selected="${s == fSource}"></option>
+        </select>
+        <select name="counsellorId">
+            <option value="">All counsellors</option>
+            <option th:each="c : ${counsellors}" th:value="${c.id}" th:text="${c.name}"
+                    th:selected="${fCounsellorId != null and c.id == fCounsellorId}"></option>
+        </select>
+        <button class="btn">Filter</button>
+        <a th:href="@{/leads}">Reset</a>
+    </form>
+
+    <p class="muted" th:text="${#lists.size(leads)} + ' lead(s)'"></p>
+    <table>
+        <thead>
+        <tr><th>Name</th><th>Phone</th><th>Source</th><th>Course</th><th>Counsellor</th><th>Status</th><th>Created</th><th>Idle days</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="l : ${leads}">
+            <td><a th:href="@{/leads/{id}(id=${l.id})}" th:text="${l.name}">Name</a></td>
+            <td th:text="${l.phone}">9876543210</td>
+            <td th:text="${l.source.label}">Website</td>
+            <td th:text="${l.courseInterest != null ? l.courseInterest.name : '-'}">-</td>
+            <td th:text="${l.assignedTo != null ? l.assignedTo.name : 'Unassigned'}">-</td>
+            <td><span class="tag" th:classappend="'s-' + ${l.status}" th:text="${l.status.label}">New</span></td>
+            <td th:text="${#temporals.format(l.createdAt, 'dd MMM yyyy')}">01 Jan 2026</td>
+            <td th:text="${l.status.closed ? '-' : l.daysSinceContact}">0</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

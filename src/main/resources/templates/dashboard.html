@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Dashboard')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main>
+    <div th:replace="~{fragments :: flash}"></div>
+    <h1>Manager dashboard</h1>
+
+    <section class="kpis">
+        <div class="kpi"><span th:text="${kpi.total}">0</span><small>Total leads</small></div>
+        <div class="kpi"><span th:text="${kpi.open}">0</span><small>Open</small></div>
+        <div class="kpi"><span th:text="${kpi.admitted}">0</span><small>Admitted</small></div>
+        <div class="kpi"><span th:text="${kpi.lost}">0</span><small>Lost</small></div>
+        <div class="kpi"><span th:text="${kpi.conversion} + '%'">0%</span><small>Conversion</small></div>
+        <div class="kpi danger"><a th:href="@{/followups/overdue}" th:text="${kpi.overdue}">0</a><small>Overdue follow-ups</small></div>
+    </section>
+
+    <section class="grid">
+        <div class="card">
+            <h2>Funnel</h2>
+            <div class="bar-row" th:each="r : ${funnel}">
+                <span class="lbl" th:text="${r.label}">Status</span>
+                <div class="bar"><div class="fill" th:style="'width:' + ${r.pct} + '%'"></div></div>
+                <span class="num" th:text="${r.count}">0</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Ageing (days since last contact, open leads)</h2>
+            <div class="bar-row" th:each="r : ${ageing}">
+                <span class="lbl" th:text="${r.label}">0-2 days</span>
+                <div class="bar"><div class="fill warn" th:style="'width:' + ${r.pct} + '%'"></div></div>
+                <span class="num" th:text="${r.count}">0</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Conversion by source</h2>
+            <table>
+                <thead><tr><th>Source</th><th>Leads</th><th>Admitted</th><th>Conversion</th></tr></thead>
+                <tbody>
+                <tr th:each="r : ${sources}">
+                    <td th:text="${r.label}">Website</td>
+                    <td th:text="${r.count}">0</td>
+                    <td th:text="${r.secondary}">0</td>
+                    <td th:text="${r.pct} + '%'">0%</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Counsellor workload</h2>
+            <table>
+                <thead><tr><th>Counsellor</th><th>Open</th><th>Admitted</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="w : ${workload}">
+                    <td th:text="${w.name}">Name</td>
+                    <td th:text="${w.open}">0</td>
+                    <td th:text="${w.admitted}">0</td>
+                    <td>
+                        <form th:if="${w.active}" th:action="@{/counsellors/{id}/unavailable(id=${w.id})}" method="post"
+                              onsubmit="return confirm('Mark unavailable and redistribute their open leads?')">
+                            <button class="link">Mark unavailable</button>
+                        </form>
+                        <span th:unless="${w.active}" class="tag off">Unavailable</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2 th:text="'Going cold: no contact for more than ' + ${coldDays} + ' days'">Going cold</h2>
+        <p class="muted" th:if="${#lists.isEmpty(cold)}">Nothing here. Every open lead has been contacted recently.</p>
+        <table th:unless="${#lists.isEmpty(cold)}">
+            <thead><tr><th>Lead</th><th>Status</th><th>Counsellor</th><th>Days since contact</th></tr></thead>
+            <tbody>
+            <tr th:each="l : ${cold}">
+                <td><a th:href="@{/leads/{id}(id=${l.id})}" th:text="${l.name}">Name</a></td>
+                <td><span class="tag" th:classappend="'s-' + ${l.status}" th:text="${l.status.label}">New</span></td>
+                <td th:text="${l.assignedTo != null ? l.assignedTo.name : 'Unassigned'}">-</td>
+                <td th:text="${l.daysSinceContact}">0</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

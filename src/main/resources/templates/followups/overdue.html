@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Overdue follow-ups')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<main>
+    <div th:replace="~{fragments :: flash}"></div>
+    <h1>Overdue follow-ups</h1>
+    <p class="muted" th:if="${#lists.isEmpty(followUps)}">Great, nothing is overdue.</p>
+    <table th:unless="${#lists.isEmpty(followUps)}">
+        <thead><tr><th>Lead</th><th>Counsellor</th><th>Type</th><th>Was due</th><th>Note</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="f : ${followUps}">
+            <td><a th:href="@{/leads/{id}(id=${f.lead.id})}" th:text="${f.lead.name}">Lead</a></td>
+            <td th:text="${f.lead.assignedTo != null ? f.lead.assignedTo.name : 'Unassigned'}">-</td>
+            <td th:text="${f.type.label}">Call</td>
+            <td th:text="${#temporals.format(f.dueAt, 'dd MMM yyyy, HH:mm')}">-</td>
+            <td th:text="${f.note != null ? f.note : '-'}">-</td>
+            <td>
+                <form th:action="@{/followups/{id}/complete(id=${f.id})}" method="post">
+                    <input type="hidden" name="leadId" th:value="${f.lead.id}">
+                    <input type="hidden" name="from" value="overdue">
+                    <button class="link">Mark done</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
