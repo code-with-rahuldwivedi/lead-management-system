@@ -1,7 +1,9 @@
 # Mandatory AI Usage Report
 
 **Assignment:** Admission Lead Management (Assignment 5)
+
 **Candidate:** Rahul Dwivedi
+
 **AI Tool Used:** Claude (Anthropic)
 
 ---
@@ -24,7 +26,7 @@
 
 ## 2. Prompts That Were Most Useful
 
-* **"Pehle bataao kaun sa problem chuna, kyun chuna, aur kaise implement kiya, phir class-by-class code do taaki main khud implement kar sakoon"**
+* **"First, tell me which problem you chose, why you chose it, and how you implemented it; then provide the code—class by class—so I can implement it myself."**
 
   Asking for the reasoning before the code, and for code delivered in checkpointed batches, made it possible to understand the implementation and identify problems incrementally instead of debugging everything at the end.
 
